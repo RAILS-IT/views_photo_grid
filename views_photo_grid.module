@@ -10,14 +10,15 @@
  */
 function template_preprocess_views_photo_grid_style(&$vars) {
   $view = $vars['view'];
+  /* @var \Drupal\views_photo_grid\Plugin\views\style\PhotoGrid $handler */
   $handler  = $view->style_plugin;
 
-  $image_field = $handler->get_image_field_name();
+  $image_field = $handler->getImageFieldName();
   if (!$image_field) {
     return;
   }
 
-  $vars['items'] = array();
+  $vars['items'] = [];
 
   foreach ($view->result as $key => $row) {
     $vars['items'][] = $handler->getField($key, $image_field);

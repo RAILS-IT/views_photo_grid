@@ -7,8 +7,10 @@
 
 namespace Drupal\views_photo_grid\Plugin\views\style;
 
+use Drupal\Core\Entity\EntityFieldManager;
 use Drupal\views\Plugin\views\style\StylePluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Style plugin to render the photo grid.
@@ -38,11 +40,31 @@ class PhotoGrid extends StylePluginBase {
   protected $usesRowPlugin = FALSE;
 
   /**
+   * @var \Drupal\Core\Entity\EntityFieldManager
+   */
+  protected $entityFieldManager;
+
+  /**
+   * Constructor.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManager $entity_field_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->entityFieldManager = $entity_field_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_field.manager'));
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['grid_padding'] = array('default' => 1);
+    $options['grid_padding'] = ['default' => 1];
     return $options;
   }
 
@@ -52,29 +74,32 @@ class PhotoGrid extends StylePluginBase {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $form['grid_padding'] = array(
+    $form['grid_padding'] = [
       '#type' => 'number',
       '#title' => $this->t('Padding'),
       '#size' => 2,
       '#description' => $this->t('The amount of padding in pixels in between grid items.'),
       '#default_value' => $this->options['grid_padding'],
       '#maxlength' => 2,
-    );
+    ];
   }
 
   /**
    * Returns the name of the image field used in the view.
    */
-  public function get_image_field_name() {
+  public function getImageFieldName() {
     $fields = $this->displayHandler->handlers['field'];
 
     // Find the first non-excluded image field.
     foreach ($fields as $key => $field) {
+      /* @var \Drupal\views\Plugin\views\field\EntityField $field */
+
       // Get the storage definition in order to determine the field type.
-      // Note: This is the same as $field->getFieldStorageDefinition(), but
-      // that method is protected and inaccessible here.
-      $field_storage_definitions = \Drupal::entityManager()->getFieldStorageDefinitions($field->definition['entity_type']);
-      $field_type = $field_storage_definitions[$field->field]->getType();
+      $field_storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($field->definition['entity_type']);
+
+      /* @var \Drupal\field\Entity\FieldStorageConfig $field_storage */
+      $field_storage = $field_storage_definitions[$field->field];
+      $field_type = $field_storage->getType();
 
       if (empty($field->options['exclude']) && $field_type == 'image') {
         return $field->field;
@@ -112,7 +137,7 @@ class PhotoGrid extends StylePluginBase {
       }
 
       // Determine the field's type.
-      $field_storage_definitions = \Drupal::entityManager()->getFieldStorageDefinitions($field->definition['entity_type']);
+      $field_storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($field->definition['entity_type']);
       $field_type = $field_storage_definitions[$field->field]->getType();
 
       if ($field_type != 'image') {
