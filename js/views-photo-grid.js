@@ -13,6 +13,11 @@
    * Class representing a photo grid.
    */
   Drupal.viewsPhotoGrid.grid = class {
+    gridId;
+    width;
+    padding;
+    rows = [];
+
     /**
      * Constructor for the grid object.
      *
@@ -28,7 +33,6 @@
       this.gridId = gridId;
       this.width = width;
       this.padding = (typeof padding !== 'undefined' ? padding : 1);
-      this.rows = [];
     }
 
     /**
@@ -38,8 +42,8 @@
      *   The new row.
      */
     createRow() {
-      var rowId = this.rows.length;
-      var row = new Drupal.viewsPhotoGrid.gridRow(rowId, this.width, this.padding);
+      let rowId = this.rows.length;
+      let row = new Drupal.viewsPhotoGrid.gridRow(rowId, this.width, this.padding);
       this.rows.push(row);
       return row;
     }
@@ -49,11 +53,11 @@
      */
     render() {
       // Keeps track of the current vertical position.
-      var currentPos = 0;
+      let currentPos = 0;
 
       // Iterate through all rows, and let them render at the current
       // vertical position.
-      for (var i = 0; i < this.rows.length; i++) {
+      for (let i = 0; i < this.rows.length; i++) {
         this.rows[i].render(currentPos);
 
         currentPos += this.rows[i].height + this.padding;
@@ -68,6 +72,13 @@
    * Class representing a grid row.
    */
   Drupal.viewsPhotoGrid.gridRow = class {
+    rowId;
+    width;
+    padding;
+    height = 0;
+    usedWidth = 0;
+    items = [];
+
     /**
      * Constructor for the row object.
      *
@@ -81,10 +92,7 @@
     constructor(rowId, width, padding) {
       this.rowId = rowId;
       this.width = width;
-      this.height = 0;
       this.padding = (typeof padding !== 'undefined' ? padding : 1);
-      this.usedWidth = 0;
-      this.items = [];
     }
 
     /**
@@ -100,7 +108,7 @@
      *   The original height of the image contained in this grid item.
      */
     createItem(itemId, width, height) {
-      var item = new Drupal.viewsPhotoGrid.gridItem(itemId);
+      let item = new Drupal.viewsPhotoGrid.gridItem(itemId);
       item.width = width;
       item.height = height;
       item.displayWidth = width;
@@ -151,8 +159,8 @@
         return item;
       }
 
-      var aspect = item.width / item.height;
-      var newWidth = Math.round(aspect * this.height);
+      let aspect = item.width / item.height;
+      let newWidth = Math.round(aspect * this.height);
 
       item.displayWidth = newWidth;
       item.displayHeight = this.height;
@@ -173,13 +181,13 @@
       // Iterate through existing items and set the height while maintaining
       // the aspect ratio.
       this.usedWidth = 0;
-      for (var i = 0; i < this.items.length; i++) {
+      for (let i = 0; i < this.items.length; i++) {
         if (!this.items[i].width || !this.items[i].height) {
           continue;
         }
 
-        var aspect = this.items[i].width / this.items[i].height;
-        var newWidth = Math.round(aspect * this.height);
+        let aspect = this.items[i].width / this.items[i].height;
+        let newWidth = Math.round(aspect * this.height);
 
         this.items[i].displayWidth = newWidth;
         this.items[i].displayHeight = this.height;
@@ -199,7 +207,7 @@
 
       // Calculate how much space is available for row items when accounting
       // for padding.
-      var targetWidth = this.width - (this.items.length - 1) * this.padding;
+      let targetWidth = this.width - (this.items.length - 1) * this.padding;
       if (targetWidth <= 0) {
         // There is no room for any items.
         return;
@@ -207,7 +215,7 @@
 
       // All items will be resized by a certain percentage to make them fit
       // the width calculated above.
-      var adjustment;
+      let adjustment;
       if (targetWidth < this.usedWidth) {
         adjustment = targetWidth / this.usedWidth;
       }
@@ -219,11 +227,11 @@
 
       // Keeps track of the X position where the next item
       // should be placed.
-      var currentPos = 0;
+      let currentPos = 0;
 
       // Adjust widths so that the items fully fill in the full width.
       // Apply css to place items.
-      for (var i = 0; i < this.items.length; i++) {
+      for (let i = 0; i < this.items.length; i++) {
 
         // Adjust size to fit the width, if needed.
         if (adjustment != 1) {
@@ -240,7 +248,7 @@
         }
 
         // Apply placement.
-        var elem = $('#views-photo-grid-' + this.items[i].itemId);
+        let elem = $('#views-photo-grid-' + this.items[i].itemId);
         elem.attr('data-row-id', this.rowId);
         elem.css('top', top + 'px');
         elem.css('left', currentPos + 'px');
@@ -256,6 +264,12 @@
    * Class representing a grid item.
    */
   Drupal.viewsPhotoGrid.gridItem = class {
+    itemId;
+    width = 0;
+    height = 0;
+    displayWidth = 0;
+    displayHeight = 0;
+
     /**
      * Constructor for the row item object.
      *
@@ -264,10 +278,6 @@
      */
     constructor(itemId) {
       this.itemId = itemId;
-      this.width = 0;
-      this.height = 0;
-      this.displayWidth = 0;
-      this.displayHeight = 0;
     }
 
   };
@@ -278,24 +288,24 @@
   Drupal.behaviors.viewsPhotoGrid.arrangeGrid = function () {
     // Find all instances of this view style.
     $('.views-photo-grid-container').each(function (containerIndex) {
-      var container = $(this);
-      var containerWidth = container.width();
+      let container = $(this);
+      let containerWidth = container.width();
 
       // Create a unique id for this grid container.
       $(this).attr('id', 'views-photo-grid-' + containerIndex);
 
       // Create grid objects.
-      var gridPadding = parseInt(drupalSettings.viewsPhotoGrid.gridPadding);
-      var grid = new Drupal.viewsPhotoGrid.grid(containerIndex, containerWidth, gridPadding);
-      var row = grid.createRow();
+      let gridPadding = parseInt(drupalSettings.viewsPhotoGrid.gridPadding);
+      let grid = new Drupal.viewsPhotoGrid.grid(containerIndex, containerWidth, gridPadding);
+      let row = grid.createRow();
 
       // Find grid items and create rows.
       container.find('.views-photo-grid-item').each(function (itemIndex) {
         // Create a unique id for this grid item.
-        var itemId = containerIndex + '-' + itemIndex;
+        let itemId = containerIndex + '-' + itemIndex;
         $(this).attr('id', 'views-photo-grid-' + itemId);
 
-        var img = $(this).find('img');
+        let img = $(this).find('img');
 
         // Remove css so that the actual size can be determined.
         $(this).find('img').css('height', '');
@@ -327,7 +337,7 @@
    *   Event handler.
    */
   Drupal.behaviors.viewsPhotoGrid.getTriggerHandler = function () {
-    var timer;
+    let timer;
 
     return function () {
       if (timer) {
@@ -344,7 +354,7 @@
    * Attaches behaviors.
    */
   Drupal.behaviors.viewsPhotoGrid.attach = function (context, settings) {
-    var triggerHandler = this.getTriggerHandler();
+    let triggerHandler = this.getTriggerHandler();
 
     // Arrange grid items.
     this.arrangeGrid();
