@@ -16,6 +16,7 @@
     gridId;
     width;
     padding;
+    maxHeight;
     rows = [];
 
     /**
@@ -29,10 +30,11 @@
      * @param padding
      *   Padding between items in pixels.
      */
-    constructor(gridId, width, padding) {
+    constructor(gridId, width, padding, maxHeight) {
       this.gridId = gridId;
       this.width = width;
-      this.padding = (typeof padding !== 'undefined' ? padding : 1);
+      this.padding = (typeof padding !== 'undefined' ? parseInt(padding) : 1);
+      this.maxHeight = (typeof maxHeight !== 'undefined' ? parseInt(maxHeight) : 0);
     }
 
     /**
@@ -43,7 +45,7 @@
      */
     createRow() {
       let rowId = this.rows.length;
-      let row = new Drupal.viewsPhotoGrid.gridRow(rowId, this.width, this.padding);
+      let row = new Drupal.viewsPhotoGrid.gridRow(rowId, this.width, this.padding, this.maxHeight);
       this.rows.push(row);
       return row;
     }
@@ -75,6 +77,7 @@
     rowId;
     width;
     padding;
+    maxHeight;
     height = 0;
     usedWidth = 0;
     items = [];
@@ -89,10 +92,11 @@
      * @param padding
      *   Padding between items in pixels.
      */
-    constructor(rowId, width, padding) {
+    constructor(rowId, width, padding, maxHeight) {
       this.rowId = rowId;
       this.width = width;
       this.padding = (typeof padding !== 'undefined' ? padding : 1);
+      this.maxHeight = (typeof maxHeight !== 'undefined' ? maxHeight : 1);
     }
 
     /**
@@ -118,14 +122,15 @@
       if ((item.displayHeight && item.displayHeight < this.height) || !this.height) {
         // This item is smaller than the current row height.
         // Need to shrink the row to avoid upscaling.
-        this.adjustRowHeight(item.height);
+        this.items.push(item);
+        this.adjustRowHeight(item.displayHeight);
       }
       else {
         // Resize the item to match the row height.
         item = this.fitItem(item);
+        this.items.push(item);
       }
 
-      this.items.push(item);
       this.usedWidth = this.usedWidth + item.displayWidth;
     }
 
@@ -176,22 +181,16 @@
      *   New height in pixels.
      */
     adjustRowHeight(newHeight) {
+      if (this.maxHeight && this.maxHeight < newHeight) {
+        newHeight = this.maxHeight;
+      }
       this.height = newHeight;
 
       // Iterate through existing items and set the height while maintaining
       // the aspect ratio.
       this.usedWidth = 0;
       for (let i = 0; i < this.items.length; i++) {
-        if (!this.items[i].width || !this.items[i].height) {
-          continue;
-        }
-
-        let aspect = this.items[i].width / this.items[i].height;
-        let newWidth = Math.round(aspect * this.height);
-
-        this.items[i].displayWidth = newWidth;
-        this.items[i].displayHeight = this.height;
-
+        this.fitItem(this.items[i]);
         this.usedWidth = this.usedWidth + this.items[i].displayWidth;
       }
     }
@@ -295,8 +294,7 @@
       $(this).attr('id', 'views-photo-grid-' + containerIndex);
 
       // Create grid objects.
-      let gridPadding = parseInt(drupalSettings.viewsPhotoGrid.gridPadding);
-      let grid = new Drupal.viewsPhotoGrid.grid(containerIndex, containerWidth, gridPadding);
+      let grid = new Drupal.viewsPhotoGrid.grid(containerIndex, containerWidth, drupalSettings.viewsPhotoGrid.gridPadding, drupalSettings.viewsPhotoGrid.maxHeight);
       let row = grid.createRow();
 
       // Find grid items and create rows.

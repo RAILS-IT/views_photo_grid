@@ -65,6 +65,7 @@ class PhotoGrid extends StylePluginBase {
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['grid_padding'] = ['default' => 1];
+    $options['max_height'] = ['default' => 0];
     return $options;
   }
 
@@ -81,6 +82,15 @@ class PhotoGrid extends StylePluginBase {
       '#description' => $this->t('The amount of padding in pixels in between grid items.'),
       '#default_value' => $this->options['grid_padding'],
       '#maxlength' => 2,
+    ];
+
+    $form['max_height'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Maximum image height'),
+      '#size' => 4,
+      '#description' => $this->t('The maximum image height in pixels.'),
+      '#default_value' => $this->options['max_height'],
+      '#maxlength' => 4,
     ];
   }
 
@@ -155,6 +165,5 @@ class PhotoGrid extends StylePluginBase {
 
     return $errors;
   }
-
 
 }

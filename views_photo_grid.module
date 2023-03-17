@@ -25,6 +25,7 @@ function template_preprocess_views_photo_grid_style(&$vars) {
   }
 
   $vars['#attached']['drupalSettings']['viewsPhotoGrid']['gridPadding'] = $handler->options['grid_padding'];
+  $vars['#attached']['drupalSettings']['viewsPhotoGrid']['maxHeight'] = $handler->options['max_height'];
   $vars['#attached']['library'][] =  'views_photo_grid/views_photo_grid';
 }
 
