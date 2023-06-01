@@ -2,7 +2,6 @@ name: Views Photo Grid
 type: module
 description: 'Adds a photo grid style plugin to Views.'
 package: Views
-core: 8.x
 core_version_requirement: ^9 || ^10
 dependencies:
   - drupal:views
