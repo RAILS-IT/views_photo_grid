@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_photo_grid\Plugin\views\style\PhotoGrid.
- */
-
 namespace Drupal\views_photo_grid\Plugin\views\style;
 
 use Drupal\Core\Entity\EntityFieldManager;
