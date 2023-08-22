@@ -239,11 +239,11 @@
           if (i < this.items.length - 1) {
             this.items[i].displayWidth = Math.round(this.items[i].displayWidth * adjustment);
           }
-          else {
-            // The last item should use up all the space that's left. This will
-            // fix the discrepancy caused by rounding.
-            this.items[i].displayWidth = this.width - currentPos;
-          }
+          //else {
+          //  // The last item should use up all the space that's left. This will
+          //  // fix the discrepancy caused by rounding.
+          //  this.items[i].displayWidth = this.width - currentPos;
+          //}
         }
 
         // Apply placement.
