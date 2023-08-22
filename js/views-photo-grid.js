@@ -242,7 +242,8 @@
           else {
             // The last item should use up all the space that's left. This will
             // fix the discrepancy caused by rounding.
-            this.items[i].displayWidth = this.width - currentPos;
+            // EDIT: No, we are not going to do the above!
+            this.items[i].displayWidth = Math.round(this.items[i].displayWidth * adjustment);
           }
         }
 
